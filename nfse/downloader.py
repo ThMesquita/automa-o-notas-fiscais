@@ -18,13 +18,6 @@ def baixar_nfse(cnpj, senha, nome, valor, download_dir, destino_dir):
     options = webdriver.ChromeOptions()
     options.add_experimental_option("detach", True)  # Para manter o navegador aberto
 
-    user_data_dir = r"C:\Users\thiag\AppData\Local\Google\Chrome\User Data"
-    
-    #Local google servidor
-    # user_data_dir = r"C:\Users\Administrator\AppData\Local\Google\Chrome\User Data"
-    options.add_argument(f"user-data-dir={user_data_dir}")
-    # options.add_argument("profile-directory=Profile 1")  # Defina o perfil correto
-
 
     # Inicializar o navegador
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
