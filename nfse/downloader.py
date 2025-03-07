@@ -13,11 +13,14 @@ from webdriver_manager.chrome import ChromeDriverManager
 # URL do site da NFSe
 URL_NFSE = "https://www.nfse.gov.br/EmissorNacional/Login?ReturnUrl=%2fEmissorNacional"
 
-def baixar_nfse(cnpj, senha, nome, valor, download_dir, destino_dir):
+def baixar_nfse(cnpj, senha, nome, valor, download_dir, destino_dir, descricao, cnpj_tomador, codigo_tributacao):
     # Configurar o WebDriver (Chrome)
     options = webdriver.ChromeOptions()
     options.add_experimental_option("detach", True)  # Para manter o navegador aberto
-
+    
+    #Local google servidor
+    # user_data_dir = r"C:\Users\Administrator\AppData\Local\Google\Chrome\User Data"
+    # options.add_argument("profile-directory=Profile 1")  # Defina o perfil correto
 
     # Inicializar o navegador
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
@@ -76,9 +79,9 @@ def baixar_nfse(cnpj, senha, nome, valor, download_dir, destino_dir):
         time.sleep(1)
         
         # Preencher o CNPJ do tomador do serviço
-        cnpj_tomador = wait.until(EC.presence_of_element_located((By.ID, "Tomador_Inscricao")))
-        cnpj_tomador.send_keys("01628604000140")
-        cnpj_tomador.send_keys(Keys.TAB)
+        cnpj_tomador_field = wait.until(EC.presence_of_element_located((By.ID, "Tomador_Inscricao")))
+        cnpj_tomador_field.send_keys(cnpj_tomador)
+        cnpj_tomador_field.send_keys(Keys.TAB)
         print("CNPJ do Tomador do Serviço preenchido.")
 
         time.sleep(2)
@@ -103,10 +106,10 @@ def baixar_nfse(cnpj, senha, nome, valor, download_dir, destino_dir):
         print("Município 'São Paulo' selecionado.")
         
         # Preencher o Código de Tributação Nacional
-        codigo_tributacao = wait.until(EC.presence_of_element_located((By.XPATH, "//span[@aria-labelledby='select2-ServicoPrestado_CodigoTributacaoNacional-container']")))
-        codigo_tributacao.click()
+        codigo_tributacao_field = wait.until(EC.presence_of_element_located((By.XPATH, "//span[@aria-labelledby='select2-ServicoPrestado_CodigoTributacaoNacional-container']")))
+        codigo_tributacao_field.click()
         input_codigo_tributacao = driver.find_element(By.XPATH, "//input[@aria-controls='select2-ServicoPrestado_CodigoTributacaoNacional-results']")
-        input_codigo_tributacao.send_keys("16.02.01")
+        input_codigo_tributacao.send_keys(codigo_tributacao)
         time.sleep(1)
         input_codigo_tributacao.send_keys(Keys.TAB)
         print("Código de Tributação Nacional preenchido.")
@@ -123,19 +126,13 @@ def baixar_nfse(cnpj, senha, nome, valor, download_dir, destino_dir):
         # Adicionar a descrição do serviço
         descricao_servico = wait.until(EC.presence_of_element_located((By.ID, "ServicoPrestado_Descricao")))
 
-        # Descrição do serviço (garanta que a descrição tenha no máximo 2000 caracteres)
-        descricao_texto = (
-            "DECLARA à Serbom Armazéns gerais e frigoríficos ltda, para fins de não incidência na fonte do Imposto sobre a Renda da Pessoa Jurídica (IRPJ),"
-            "da Contribuição Social sobre o Lucro Líquido (CSLL), da Contribuição para o Financiamento da Seguridade Social (Cofins), e da Contribuição para o PIS/Pasep,"
-            "a que se refere o art. 64 da Lei nº 9.430, de 27 de dezembro de 1996, que é regularmente inscrita no Regime Especial Unificado de Arrecadação de Tributos e Contribuições"
-            "devidos pelas Microempresas e Empresas de Pequeno Porte Simples Nacional, de que trata o art. 12 da Lei Complementar nº 123, de 14 de dezembro de 2006"
-        )
-
         # Limitar o texto ao tamanho máximo de 2000 caracteres
-        descricao_texto = descricao_texto[:2000]
+        descricao = descricao[:2000]
 
         # Enviar a descrição para o campo de texto
-        descricao_servico.send_keys(descricao_texto)
+        descricao_servico.send_keys(descricao)
+
+        time.sleep(10)
         
         # Clicar no botão "Avançar"
         botao_avancar = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@type='submit' and contains(@class, 'btn-primary') and contains(., 'Avançar')]")))

@@ -34,10 +34,13 @@ def iniciar_processo():
     caminho_arquivo = entrada_arquivo.get()
     download_dir = entrada_diretorio_download.get()
     destino_dir = entrada_diretorio_destino.get()
+    descricao = entrada_descricao.get("1.0", tk.END).strip()
+    cnpj_tomador = entrada_cnpj_tomador.get().strip()
+    codigo_tributacao = entrada_codigo_tributacao.get().strip()
 
-    if not caminho_arquivo or not download_dir or not destino_dir:
-        messagebox.showerror("Erro", "Por favor, selecione todos os caminhos necessários.")
-        logging.error("Caminhos necessários não foram selecionados.")
+    if not caminho_arquivo or not download_dir or not destino_dir or not descricao or not cnpj_tomador or not codigo_tributacao:
+        messagebox.showerror("Erro", "Por favor, selecione todos os caminhos necessários, insira a descrição, o CNPJ do tomador e o Código de Tributação Nacional.")
+        logging.error("Caminhos necessários, descrição, CNPJ do tomador ou Código de Tributação Nacional não foram selecionados.")
         return
 
     try:
@@ -51,7 +54,7 @@ def iniciar_processo():
 
         for i, row in df.iterrows():
             logging.info(f"Processando {i+1}/{total}: {row['Nome']}")
-            baixar_nfse(row['CNPJ'], row['Senha'], row['Nome'], row['Valor'], download_dir, destino_dir)
+            baixar_nfse(row['CNPJ'], row['Senha'], row['Nome'], row['Valor'], download_dir, destino_dir, descricao, cnpj_tomador, codigo_tributacao)
             time.sleep(5)  # Evitar bloqueios no site
 
         messagebox.showinfo("Concluído", "Processo concluído.")
@@ -82,7 +85,22 @@ entrada_diretorio_destino = tk.Entry(root, width=50)
 entrada_diretorio_destino.grid(row=2, column=1, padx=10, pady=10)
 tk.Button(root, text="Selecionar", command=selecionar_diretorio_destino).grid(row=2, column=2, padx=10, pady=10)
 
+# Campo de texto para a descrição
+tk.Label(root, text="Descrição:").grid(row=3, column=0, padx=10, pady=10)
+entrada_descricao = tk.Text(root, width=50, height=10)
+entrada_descricao.grid(row=3, column=1, padx=10, pady=10, columnspan=2)
+
+# Campo de entrada para o CNPJ do tomador do serviço
+tk.Label(root, text="CNPJ do Tomador:").grid(row=4, column=0, padx=10, pady=10)
+entrada_cnpj_tomador = tk.Entry(root, width=50)
+entrada_cnpj_tomador.grid(row=4, column=1, padx=10, pady=10, columnspan=2)
+
+# Campo de entrada para o Código de Tributação Nacional
+tk.Label(root, text="Código de Tributação Nacional:").grid(row=5, column=0, padx=10, pady=10)
+entrada_codigo_tributacao = tk.Entry(root, width=50)
+entrada_codigo_tributacao.grid(row=5, column=1, padx=10, pady=10, columnspan=2)
+
 # Botão para iniciar o processo
-tk.Button(root, text="Iniciar Processo", command=iniciar_processo).grid(row=3, column=0, columnspan=3, padx=10, pady=20)
+tk.Button(root, text="Iniciar Processo", command=iniciar_processo).grid(row=6, column=0, columnspan=3, padx=10, pady=20)
 
 root.mainloop()
