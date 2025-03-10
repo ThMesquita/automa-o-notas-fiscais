@@ -9,7 +9,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
-from nfse.chrome_utils import get_chrome_user_data_dir, fechar_instancias_chrome
+from nfse.chrome_utils import get_chrome_user_data_dir, get_chrome_profile_dir, fechar_instancias_chrome
 
 # URL do site da NFSe
 URL_NFSE = "https://www.nfse.gov.br/EmissorNacional/Login?ReturnUrl=%2fEmissorNacional"
@@ -24,9 +24,10 @@ def baixar_nfse(cnpj, senha, nome, valor, download_dir, destino_dir, descricao, 
     
     # Obter o diretório do perfil do Chrome automaticamente
     user_data_dir = get_chrome_user_data_dir()
+    profile_dir = get_chrome_profile_dir(user_data_dir)
     
     options.add_argument(f"user-data-dir={user_data_dir}")
-    options.add_argument("profile-directory=Default")
+    options.add_argument(f"profile-directory={profile_dir}")
     options.add_argument("--no-sandbox")  # Adicionar opção para evitar problemas de sandbox
     options.add_argument("--disable-dev-shm-usage")  # Adicionar opção para evitar problemas de uso de memória compartilhada
     options.add_argument("--disable-extensions")  # Desativar extensões

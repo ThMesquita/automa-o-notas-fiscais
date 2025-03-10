@@ -5,9 +5,14 @@ from nfse.utils import carregar_dados_excel
 import time
 import logging
 import os
+import tempfile
 
-# Configurar logging
-logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+# Criar um diretório temporário para armazenar o arquivo de log
+temp_dir = tempfile.gettempdir()
+log_file_path = os.path.join(temp_dir, 'app.log')
+
+# Configurar logging para sobrescrever o arquivo de log a cada execução
+logging.basicConfig(filename=log_file_path, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', filemode='w')
 
 def selecionar_arquivo():
     caminho_arquivo = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsm *.xlsx")])
