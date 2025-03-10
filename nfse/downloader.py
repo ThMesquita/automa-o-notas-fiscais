@@ -1,6 +1,6 @@
+import os
 import time
 import shutil
-import os
 import glob
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -9,18 +9,29 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
+from nfse.chrome_utils import get_chrome_user_data_dir, fechar_instancias_chrome
 
 # URL do site da NFSe
 URL_NFSE = "https://www.nfse.gov.br/EmissorNacional/Login?ReturnUrl=%2fEmissorNacional"
 
 def baixar_nfse(cnpj, senha, nome, valor, download_dir, destino_dir, descricao, cnpj_tomador, codigo_tributacao):
+    # Fechar todas as instâncias do Chrome antes de iniciar o WebDriver
+    fechar_instancias_chrome()
+
     # Configurar o WebDriver (Chrome)
     options = webdriver.ChromeOptions()
     options.add_experimental_option("detach", True)  # Para manter o navegador aberto
     
-    #Local google servidor
-    # user_data_dir = r"C:\Users\Administrator\AppData\Local\Google\Chrome\User Data"
-    # options.add_argument("profile-directory=Profile 1")  # Defina o perfil correto
+    # Obter o diretório do perfil do Chrome automaticamente
+    user_data_dir = get_chrome_user_data_dir()
+    
+    options.add_argument(f"user-data-dir={user_data_dir}")
+    options.add_argument("profile-directory=Default")
+    options.add_argument("--no-sandbox")  # Adicionar opção para evitar problemas de sandbox
+    options.add_argument("--disable-dev-shm-usage")  # Adicionar opção para evitar problemas de uso de memória compartilhada
+    options.add_argument("--disable-extensions")  # Desativar extensões
+    options.add_argument("--disable-gpu")  # Desativar GPU (necessário para headless em alguns sistemas)
+    options.add_argument("--window-size=1920,1080")  # Definir tamanho da janela
 
     # Inicializar o navegador
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
@@ -37,8 +48,9 @@ def baixar_nfse(cnpj, senha, nome, valor, download_dir, destino_dir, descricao, 
         print("Campo CNPJ encontrado:", cnpj_field is not None)
         print("Campo Senha encontrado:", senha_field is not None)
         
-        cnpj_field.clear()
-        senha_field.clear()
+        # Usar JavaScript para limpar os campos de login e senha
+        driver.execute_script("arguments[0].value = '';", cnpj_field)
+        driver.execute_script("arguments[0].value = '';", senha_field)
         
         cnpj_field.send_keys(cnpj)
         senha_field.send_keys(senha)
@@ -131,8 +143,6 @@ def baixar_nfse(cnpj, senha, nome, valor, download_dir, destino_dir, descricao, 
 
         # Enviar a descrição para o campo de texto
         descricao_servico.send_keys(descricao)
-
-        time.sleep(10)
         
         # Clicar no botão "Avançar"
         botao_avancar = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@type='submit' and contains(@class, 'btn-primary') and contains(., 'Avançar')]")))
@@ -141,8 +151,11 @@ def baixar_nfse(cnpj, senha, nome, valor, download_dir, destino_dir, descricao, 
         
         # Preencher o campo valor
         campo_valor = wait.until(EC.presence_of_element_located((By.ID, "Valores_ValorServico")))
-        campo_valor.send_keys(valor)
-        print("Campo valor preenchido.")
+        
+        # Garantir que o valor tenha duas casas decimais
+        valor_formatado = f"{float(valor):.2f}"
+        campo_valor.send_keys(valor_formatado)
+        print(f"Campo valor preenchido com: {valor_formatado}")
 
         #Botão Não informar
         botao_nao_tributos = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'input[name="ValorTributos.TipoValorTributos"][value="3"]')))
@@ -162,7 +175,7 @@ def baixar_nfse(cnpj, senha, nome, valor, download_dir, destino_dir, descricao, 
         botao_emitir.click()
         print("Botão 'Emitir Nota' clicado.")
         
-        time.sleep(5)  # Esperar o processamento
+        time.sleep(3)  # Esperar o processamento
         
         # Fazer o download dos arquivos XML e PDF
         botao_download_xml = wait.until(EC.element_to_be_clickable((By.ID, "btnDownloadXml")))
