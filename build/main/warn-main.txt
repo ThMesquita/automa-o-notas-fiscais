@@ -270,7 +270,6 @@ missing module named python_calamine - imported by pandas.io.excel._calamine (de
 missing module named 'matplotlib.pyplot' - imported by pandas.io.formats.style (optional)
 missing module named matplotlib - imported by pandas.plotting._core (conditional), pandas.io.formats.style (optional)
 missing module named 'matplotlib.colors' - imported by pandas.plotting._misc (conditional), pandas.io.formats.style (conditional)
-missing module named markupsafe - imported by pandas.io.formats.style_render (top-level)
 missing module named botocore - imported by pandas.io.common (delayed, conditional, optional)
 missing module named sets - imported by pytz.tzinfo (optional)
 missing module named UserDict - imported by pytz.lazy (optional)

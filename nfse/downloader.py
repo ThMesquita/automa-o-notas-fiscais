@@ -14,7 +14,21 @@ from nfse.chrome_utils import get_chrome_user_data_dir, get_chrome_profile_dir, 
 # URL do site da NFSe
 URL_NFSE = "https://www.nfse.gov.br/EmissorNacional/Login?ReturnUrl=%2fEmissorNacional"
 
+# Obter o diretório do perfil do Chrome automaticamente uma vez
+try:
+    USER_DATA_DIR = get_chrome_user_data_dir()
+    PROFILE_DIR = get_chrome_profile_dir(USER_DATA_DIR)
+except EnvironmentError as e:
+    print(e)
+    fechar_instancias_chrome()
+    USER_DATA_DIR = None
+    PROFILE_DIR = None
+
 def baixar_nfse(cnpj, senha, nome, valor, download_dir, destino_dir, descricao, cnpj_tomador, codigo_tributacao):
+    if USER_DATA_DIR is None or PROFILE_DIR is None:
+        print(f"Erro ao obter o diretório do perfil do Chrome para {nome}")
+        return
+
     # Fechar todas as instâncias do Chrome antes de iniciar o WebDriver
     fechar_instancias_chrome()
 
@@ -22,12 +36,8 @@ def baixar_nfse(cnpj, senha, nome, valor, download_dir, destino_dir, descricao, 
     options = webdriver.ChromeOptions()
     options.add_experimental_option("detach", True)  # Para manter o navegador aberto
     
-    # Obter o diretório do perfil do Chrome automaticamente
-    user_data_dir = get_chrome_user_data_dir()
-    profile_dir = get_chrome_profile_dir(user_data_dir)
-    
-    options.add_argument(f"user-data-dir={user_data_dir}")
-    options.add_argument(f"profile-directory={profile_dir}")
+    options.add_argument(f"user-data-dir={USER_DATA_DIR}")
+    options.add_argument(f"profile-directory={PROFILE_DIR}")
     options.add_argument("--no-sandbox")  # Adicionar opção para evitar problemas de sandbox
     options.add_argument("--disable-dev-shm-usage")  # Adicionar opção para evitar problemas de uso de memória compartilhada
     options.add_argument("--disable-extensions")  # Desativar extensões

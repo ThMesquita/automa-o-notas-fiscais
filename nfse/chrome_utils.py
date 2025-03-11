@@ -1,5 +1,6 @@
 import os
 import subprocess
+import time
 
 def get_chrome_user_data_dir():
     # Diretórios padrão do Chrome no Windows
